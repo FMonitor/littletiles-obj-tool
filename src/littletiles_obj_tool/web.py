@@ -11,7 +11,7 @@ from littletiles_obj_tool.bootstrap import setup_local_deps
 
 setup_local_deps()
 
-from flask import Flask, flash, jsonify, redirect, render_template, request, send_file, url_for
+from flask import Flask, current_app, flash, jsonify, redirect, render_template, request, send_file, url_for
 
 from littletiles_obj_tool.converters import (
     convert_obj_to_snbt,
@@ -65,7 +65,12 @@ def create_app() -> Flask:
 
     @app.get("/")
     def index():
-        return render_template("index.html", block_options=LITTLETILES_COLORED_BLOCKS, default_block=DEFAULT_WEB_BLOCK)
+        return render_template(
+            "index.html",
+            block_options=LITTLETILES_COLORED_BLOCKS,
+            default_block=DEFAULT_WEB_BLOCK,
+            auto_exit_on_browser_close=bool(app.config.get("AUTO_EXIT_ON_BROWSER_CLOSE", False)),
+        )
 
     @app.post("/convert")
     def convert():
@@ -111,6 +116,14 @@ def create_app() -> Flask:
             except Exception as exc:  # pragma: no cover
                 return jsonify({"error": str(exc)}), 400
             return jsonify(payload)
+
+    @app.post("/api/client/heartbeat")
+    def client_heartbeat():
+        if current_app.config.get("AUTO_EXIT_ON_BROWSER_CLOSE"):
+            session_monitor = current_app.extensions.get("desktop_session_monitor")
+            if session_monitor is not None:
+                session_monitor.note_heartbeat()
+        return ("", 204)
 
     return app
 

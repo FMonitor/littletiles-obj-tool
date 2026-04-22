@@ -68,6 +68,7 @@ const colorState = {
   val: 1,
   alpha: 255,
 };
+const desktopConfig = window.LTDesktopConfig || { autoExitOnBrowserClose: false };
 
 let previewRuntime = null;
 let previewRuntimePromise = null;
@@ -549,6 +550,21 @@ function applyPreviewMaterial() {
   previewRuntime.applyObjMaterial(getCurrentColor());
 }
 
+function startDesktopHeartbeat() {
+  if (!desktopConfig.autoExitOnBrowserClose) return;
+
+  const sendHeartbeat = () => {
+    fetch("/api/client/heartbeat", {
+      method: "POST",
+      keepalive: true,
+      cache: "no-store",
+    }).catch(() => {});
+  };
+
+  sendHeartbeat();
+  window.setInterval(sendHeartbeat, 2000);
+}
+
 sourceInputs.old.addEventListener("change", () => {
   updateSourceState();
   if (sourceInputs.old.files.length > 0) requestPreview();
@@ -612,3 +628,4 @@ window.addEventListener("resize", () => {
 
 updateSourceState();
 updateColorUI(false);
+startDesktopHeartbeat();

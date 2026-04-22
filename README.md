@@ -32,6 +32,37 @@ It is designed for practical asset conversion workflows around LittleTiles `SNBT
 OBJ            ->  1.20/1.21 SNBT
 ```
 
+### Run a Prebuilt Release
+
+If you already downloaded a packaged release, you do not need to install Python or project dependencies.
+
+Run on Windows:
+
+1. Download the Windows release package or `LittleTilesOBJTool.exe`
+2. Double-click `LittleTilesOBJTool.exe`
+3. Your default browser will open the local Web UI automatically
+4. Closing the browser page will stop the background process after a short timeout
+
+Run on Linux:
+
+1. Download the Linux release package or `LittleTilesOBJTool`
+2. Make it executable if needed:
+
+```bash
+chmod +x LittleTilesOBJTool
+```
+
+3. Start it:
+
+```bash
+./LittleTilesOBJTool
+```
+
+4. Your default browser will open the local Web UI automatically
+5. Closing the browser page will stop the background process after a short timeout
+
+If your desktop environment does not auto-open a browser, open the shown local address manually in your browser.
+
 ### Project Structure
 
 ```text
@@ -163,9 +194,50 @@ Output location:
 dist/LittleTilesOBJTool
 ```
 
+### Platform-Specific Packaging
+
+PyInstaller builds for the current platform only.
+
+- Build on Windows if you want a Windows `.exe`
+- Build on Linux if you want a Linux native executable
+- Cross-building between Windows and Linux is generally not recommended for this project
+
+Build on Windows:
+
+```bash
+python -m pip install -e .[build]
+python packaging/build_desktop.py --windowed
+```
+
+Typical output:
+
+```text
+dist/LittleTilesOBJTool.exe
+```
+
+Build on Linux:
+
+```bash
+python3 -m pip install -e .[build]
+python3 packaging/build_desktop.py
+```
+
+Typical output:
+
+```text
+dist/LittleTilesOBJTool
+```
+
+Recommended release workflow:
+
+1. Build the Windows package on Windows
+2. Build the Linux package on Linux
+3. Upload both artifacts separately to GitHub Releases
+
 ### Notes
 
 - The desktop executable starts a local Flask server and opens your default browser automatically.
+- In desktop mode, closing the browser page stops the heartbeat and the background process exits automatically after a short timeout.
 - If the default port is already in use, the app falls back to another free local port.
 - The preview panel still requires browser WebGL support.
 - `OBJ -> SNBT` follows the general one-triangle-to-box style used by the old importer/exporter workflow where needed.
@@ -195,6 +267,37 @@ This project is currently released under the [MIT License](./LICENSE).
 - 本地网页界面与 3D 预览
 - 可打包为独立可执行文件
 - 预览所需前端资源已本地化，不再依赖 CDN
+
+### 直接运行已发布的程序
+
+如果你下载的是已经打包好的发布版，就不需要额外安装 Python 或项目依赖。
+
+在 Windows 上运行：
+
+1. 下载 Windows 发布包或 `LittleTilesOBJTool.exe`
+2. 双击 `LittleTilesOBJTool.exe`
+3. 程序会自动打开默认浏览器并进入本地网页界面
+4. 关闭网页后，后台进程会在短暂超时后自动退出
+
+在 Linux 上运行：
+
+1. 下载 Linux 发布包或 `LittleTilesOBJTool`
+2. 如果没有执行权限，先执行：
+
+```bash
+chmod +x LittleTilesOBJTool
+```
+
+3. 运行：
+
+```bash
+./LittleTilesOBJTool
+```
+
+4. 程序会自动打开默认浏览器并进入本地网页界面
+5. 关闭网页后，后台进程会在短暂超时后自动退出
+
+如果桌面环境没有自动拉起浏览器，也可以手动打开程序显示的本地地址。
 
 ### 安装
 
@@ -280,9 +383,50 @@ python3 packaging/build_desktop.py --windowed
 dist/LittleTilesOBJTool
 ```
 
+### 按平台打包
+
+PyInstaller 默认只能为当前系统打包。
+
+- 想得到 Windows 的 `.exe`，请在 Windows 上打包
+- 想得到 Linux 的本地可执行文件，请在 Linux 上打包
+- 一般不建议在这个项目里做 Windows 和 Linux 的交叉打包
+
+在 Windows 上打包：
+
+```bash
+python -m pip install -e .[build]
+python packaging/build_desktop.py --windowed
+```
+
+常见输出：
+
+```text
+dist/LittleTilesOBJTool.exe
+```
+
+在 Linux 上打包：
+
+```bash
+python3 -m pip install -e .[build]
+python3 packaging/build_desktop.py
+```
+
+常见输出：
+
+```text
+dist/LittleTilesOBJTool
+```
+
+推荐发布方式：
+
+1. 在 Windows 上打一次 Windows 包
+2. 在 Linux 上打一次 Linux 包
+3. 把两个产物分别上传到 GitHub Releases
+
 ### 说明
 
 - 打包后的程序会启动本地 Flask 服务，并自动打开默认浏览器。
+- 桌面模式下，关闭网页后心跳会停止，后台进程会在短暂超时后自动退出。
 - 如果默认端口被占用，会自动切换到空闲端口。
 - 3D 预览仍然依赖浏览器本身支持 WebGL。
 - 页面所需的 `three.js` 等资源已经打包进项目，不再依赖外部 CDN。
