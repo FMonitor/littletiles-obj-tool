@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "littletiles-obj-tool"
+version = "0.1.0"
+description = "Standalone LittleTiles 1.12/1.21 SNBT and OBJ conversion tool"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "nbtlib>=2.0.4",
+  "Flask>=3.1.0",
+]
+
+[project.scripts]
+lt-obj-tool = "littletiles_obj_tool.cli:main"
+lt-obj-web = "littletiles_obj_tool.web:main"
+lt-obj-desktop = "littletiles_obj_tool.desktop:main"
+
+[project.optional-dependencies]
+build = [
+  "pyinstaller>=6.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+littletiles_obj_tool = [
+  "templates/*.html",
+  "static/css/*.css",
+  "static/js/*.js",
+  "static/vendor/three/build/*.js",
+  "static/vendor/three/examples/jsm/controls/*.js",
+  "static/vendor/three/examples/jsm/loaders/*.js",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

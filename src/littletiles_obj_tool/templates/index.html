@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LittleTiles OBJ Tool</title>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "{{ url_for('static', filename='vendor/three/build/three.module.js') }}",
+        "three/addons/": "{{ url_for('static', filename='vendor/three/examples/jsm/') }}"
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+  <div class="shell">
+    <h1>LittleTiles OBJ Tool</h1>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alerts">
+          {% for message in messages %}
+            <div>{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="workspace">
+      <section class="panel left-panel">
+        <div class="section-head">
+          <h2>Source</h2>
+          <p class="mini-note">Only one active input</p>
+        </div>
+
+        <div class="source-list">
+          <article class="source-card" data-source-card="old">
+            <div class="source-row">
+              <h3 class="source-title">1.12 SNBT / TXT</h3>
+              <button type="button" class="clear-button" data-clear-source="old" hidden aria-label="Clear 1.12 source">×</button>
+            </div>
+            <p class="source-meta">Old text export</p>
+            <div class="source-picker">
+              <label class="upload-label" data-upload-label="old">
+                <input id="old_file" type="file" accept=".snbt,.txt,text/plain" data-source-input="old">
+                <span>Select file</span>
+              </label>
+            </div>
+            <div class="file-meta" data-file-name="old">No file selected.</div>
+          </article>
+
+          <article class="source-card" data-source-card="new">
+            <div class="source-row">
+              <h3 class="source-title">1.20 / 1.21 SNBT</h3>
+              <button type="button" class="clear-button" data-clear-source="new" hidden aria-label="Clear 1.20 or 1.21 source">×</button>
+            </div>
+            <p class="source-meta">Current text export</p>
+            <div class="source-picker">
+              <label class="upload-label" data-upload-label="new">
+                <input id="new_file" type="file" accept=".snbt,.txt,text/plain" data-source-input="new">
+                <span>Select file</span>
+              </label>
+            </div>
+            <div class="file-meta" data-file-name="new">No file selected.</div>
+          </article>
+
+          <article class="source-card" data-source-card="obj">
+            <div class="source-row">
+              <h3 class="source-title">OBJ</h3>
+              <button type="button" class="clear-button" data-clear-source="obj" hidden aria-label="Clear OBJ source">×</button>
+            </div>
+            <p class="source-meta">Geometry input</p>
+            <div class="source-picker">
+              <label class="upload-label" data-upload-label="obj">
+                <input id="obj_file" type="file" accept=".obj" data-source-input="obj">
+                <span>Select file</span>
+              </label>
+            </div>
+            <div class="file-meta" data-file-name="obj">No file selected.</div>
+          </article>
+        </div>
+
+        <section class="action-panel">
+          <div class="section-head">
+            <h2>Export</h2>
+            <p class="mini-note">Valid targets only</p>
+          </div>
+          <div id="action-status" class="action-status">Choose one source file.</div>
+          <div class="action-grid">
+            <button type="button" class="action-button" data-mode="old-to-new" data-source="old" hidden>1.12 -> 1.20 / 1.21 SNBT</button>
+            <button type="button" class="action-button secondary" data-mode="old-to-obj" data-source="old" hidden>1.12 -> OBJ + MTL ZIP</button>
+            <button type="button" class="action-button secondary" data-mode="snbt-to-obj" data-source="new" hidden>1.20 / 1.21 -> OBJ + MTL ZIP</button>
+            <button type="button" class="action-button" data-mode="obj-to-snbt" data-source="obj" hidden>OBJ -> 1.20 / 1.21 SNBT</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="panel right-panel">
+        <section class="color-panel">
+          <div class="section-head">
+            <h2>Material</h2>
+            <p class="mini-note">Used for OBJ import</p>
+          </div>
+
+          <div class="color-layout">
+            <div class="wheel-shell">
+              <div id="hue-wheel" class="hue-wheel" aria-label="Hue wheel">
+                <div id="hue-thumb" class="hue-thumb"></div>
+                <div id="color-preview" class="wheel-center">
+                  <div id="color-readout" class="wheel-readout">#FFFFFF<br>A255</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="control-stack">
+              <div class="slider-row">
+                <label for="sat_range">Sat</label>
+                <input id="sat_range" type="range" min="0" max="100" value="100">
+                <div id="sat_value" class="slider-value">100%</div>
+              </div>
+              <div class="slider-row">
+                <label for="val_range">Value</label>
+                <input id="val_range" type="range" min="0" max="100" value="100">
+                <div id="val_value" class="slider-value">100%</div>
+              </div>
+              <div class="slider-row">
+                <label for="alpha_range">Alpha</label>
+                <input id="alpha_range" type="range" min="0" max="255" value="255">
+                <div id="alpha_value" class="slider-value">255</div>
+              </div>
+
+              <div class="numeric-grid">
+                <div class="field">
+                  <label for="color_r">R</label>
+                  <input id="color_r" type="number" min="0" max="255" value="255" data-obj-option>
+                </div>
+                <div class="field">
+                  <label for="color_g">G</label>
+                  <input id="color_g" type="number" min="0" max="255" value="255" data-obj-option>
+                </div>
+                <div class="field">
+                  <label for="color_b">B</label>
+                  <input id="color_b" type="number" min="0" max="255" value="255" data-obj-option>
+                </div>
+                <div class="field">
+                  <label for="color_a">A</label>
+                  <input id="color_a" type="number" min="0" max="255" value="255" data-obj-option>
+                </div>
+              </div>
+
+              <div class="param-grid">
+                <div class="field obj-only-field" data-obj-only-tooltip="OBJ only">
+                  <label for="grid">Grid</label>
+                  <input id="grid" type="number" min="1" value="16" data-obj-option>
+                </div>
+                <div class="field obj-only-field" data-obj-only-tooltip="OBJ only">
+                  <label for="max_size">Size</label>
+                  <input id="max_size" type="number" min="1" value="16" data-obj-option>
+                </div>
+                <div class="field block-field obj-only-field" data-obj-only-tooltip="OBJ only">
+                  <label for="block">Block</label>
+                  <select id="block" data-obj-option>
+                    {% for option in block_options %}
+                      <option value="{{ option.id }}"{% if option.id == default_block %} selected{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="preview-panel">
+          <div class="preview-head">
+            <h2>OBJ Preview</h2>
+            <button type="button" id="refresh-preview" class="preview-button">Refresh Preview</button>
+          </div>
+          <div id="preview-status" class="preview-status">Choose a source file to preview.</div>
+          <div id="viewer" class="viewer">
+            <div id="viewer-empty" class="viewer-empty">Preview loads on demand. Conversion still works even if the 3D library cannot be loaded.</div>
+            <div class="viewer-hint">Left drag: rotate. Right drag: pan. Wheel: zoom.</div>
+          </div>
+        </section>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
