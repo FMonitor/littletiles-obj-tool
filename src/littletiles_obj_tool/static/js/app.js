@@ -1,8 +1,3 @@
-import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
-import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
-
 const sourceInputs = Object.fromEntries(
   Array.from(document.querySelectorAll("[data-source-input]")).map((input) => [input.dataset.sourceInput, input])
 );
@@ -68,10 +63,32 @@ const colorState = {
   val: 1,
   alpha: 255,
 };
-const desktopConfig = window.LTDesktopConfig || { autoExitOnBrowserClose: false };
+const desktopConfig = window.LTDesktopConfig || { autoExitOnBrowserClose: false, assetUrls: {} };
 
 let previewRuntime = null;
 let previewRuntimePromise = null;
+let threeModulesPromise = null;
+
+function getThreeModules() {
+  if (!threeModulesPromise) {
+    threeModulesPromise = (async () => {
+      const assetUrls = desktopConfig.assetUrls || {};
+      const [THREE, orbitModule, objModule, mtlModule] = await Promise.all([
+        import(assetUrls.three),
+        import(assetUrls.orbitControls),
+        import(assetUrls.objLoader),
+        import(assetUrls.mtlLoader),
+      ]);
+      return {
+        THREE,
+        OrbitControls: orbitModule.OrbitControls,
+        OBJLoader: objModule.OBJLoader,
+        MTLLoader: mtlModule.MTLLoader,
+      };
+    })();
+  }
+  return threeModulesPromise;
+}
 
 function clampByte(value) {
   const numeric = Number.parseInt(value, 10);
@@ -355,6 +372,7 @@ async function ensurePreviewRuntime() {
 
 async function createPreviewRuntime() {
   const viewer = document.getElementById("viewer");
+  const { THREE, OrbitControls, OBJLoader, MTLLoader } = await getThreeModules();
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));

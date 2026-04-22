@@ -4,20 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LittleTiles OBJ Tool</title>
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "{{ url_for('static', filename='vendor/three/build/three.module.js') }}",
-        "three/addons/": "{{ url_for('static', filename='vendor/three/examples/jsm/') }}"
-      }
-    }
-  </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
 <body>
   <script>
     window.LTDesktopConfig = {
-      autoExitOnBrowserClose: {{ "true" if auto_exit_on_browser_close else "false" }}
+      autoExitOnBrowserClose: {{ "true" if auto_exit_on_browser_close else "false" }},
+      assetUrls: {
+        three: "{{ url_for('static', filename='vendor/three/build/three.module.js') }}",
+        orbitControls: "{{ url_for('static', filename='vendor/three/examples/jsm/controls/OrbitControls.js') }}",
+        objLoader: "{{ url_for('static', filename='vendor/three/examples/jsm/loaders/OBJLoader.js') }}",
+        mtlLoader: "{{ url_for('static', filename='vendor/three/examples/jsm/loaders/MTLLoader.js') }}"
+      }
     };
   </script>
   <div class="shell">
