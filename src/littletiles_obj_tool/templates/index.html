@@ -6,18 +6,10 @@
   <title>LittleTiles OBJ Tool</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
-<body>
-  <script>
-    window.LTDesktopConfig = {
-      autoExitOnBrowserClose: {{ "true" if auto_exit_on_browser_close else "false" }},
-      assetUrls: {
-        three: "{{ url_for('static', filename='vendor/three/build/three.module.js') }}",
-        orbitControls: "{{ url_for('static', filename='vendor/three/examples/jsm/controls/OrbitControls.js') }}",
-        objLoader: "{{ url_for('static', filename='vendor/three/examples/jsm/loaders/OBJLoader.js') }}",
-        mtlLoader: "{{ url_for('static', filename='vendor/three/examples/jsm/loaders/MTLLoader.js') }}"
-      }
-    };
-  </script>
+<body
+  data-auto-exit-on-browser-close="{{ 'true' if auto_exit_on_browser_close else 'false' }}"
+  data-preview-runtime-url="{{ url_for('static', filename='js/preview_runtime.js') }}"
+>
   <div class="shell">
     <h1>LittleTiles OBJ Tool</h1>
 
