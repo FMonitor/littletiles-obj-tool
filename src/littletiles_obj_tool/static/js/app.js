@@ -73,13 +73,33 @@ const desktopConfig = {
 
 let previewRuntime = null;
 let previewRuntimePromise = null;
-let previewRuntimeModulePromise = null;
+let previewRuntimeScriptPromise = null;
 
-function getPreviewRuntimeModule() {
-  if (!previewRuntimeModulePromise) {
-    previewRuntimeModulePromise = import(desktopConfig.assetUrls.previewRuntime);
+function loadPreviewRuntimeScript() {
+  if (!previewRuntimeScriptPromise) {
+    previewRuntimeScriptPromise = new Promise((resolve, reject) => {
+      if (window.LTPreviewRuntime?.createPreviewRuntime) {
+        resolve(window.LTPreviewRuntime);
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = desktopConfig.assetUrls.previewRuntime;
+      script.async = true;
+      script.onload = () => {
+        if (window.LTPreviewRuntime?.createPreviewRuntime) {
+          resolve(window.LTPreviewRuntime);
+          return;
+        }
+        reject(new Error("Preview runtime loaded but did not initialize correctly."));
+      };
+      script.onerror = () => {
+        reject(new Error(`Failed to load preview runtime: ${desktopConfig.assetUrls.previewRuntime}`));
+      };
+      document.head.appendChild(script);
+    });
   }
-  return previewRuntimeModulePromise;
+  return previewRuntimeScriptPromise;
 }
 
 function clampByte(value) {
@@ -364,8 +384,8 @@ async function ensurePreviewRuntime() {
 
 async function createPreviewRuntime() {
   const viewer = document.getElementById("viewer");
-  const previewRuntimeModule = await getPreviewRuntimeModule();
-  return previewRuntimeModule.createPreviewRuntime({ viewer, viewerEmpty, getCurrentColor });
+  const previewRuntimeGlobal = await loadPreviewRuntimeScript();
+  return previewRuntimeGlobal.createPreviewRuntime({ viewer, viewerEmpty, getCurrentColor });
 }
 
 async function requestPreview() {
